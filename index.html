@@ -139,33 +139,74 @@ body:not(.edit) [contenteditable]:empty::before{content:none}
 .compact table.deck{border-spacing:0 5px}
 .compact table.deck td{padding:.45em 18px}
 /* UI */
-#ui{position:fixed;left:50%;bottom:14px;width:max-content;white-space:nowrap;transform:translateX(-50%);display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.92);border:1px solid var(--bd2);border-radius:999px;padding:6px 10px;z-index:10;font-family:var(--head);font-size:14px;color:var(--t2);backdrop-filter:blur(6px);transition:opacity .3s;box-shadow:var(--sh)}
-#ui button{font-family:var(--head);font-weight:700;font-size:14px;background:#fff;color:var(--t1);border:1px solid rgba(18,18,18,.12);border-radius:999px;padding:6px 14px;cursor:pointer}
-#ui button:hover{border-color:var(--bl);color:var(--bl)}
-#ui #bData{background:var(--v);color:#fff;border-color:var(--v);box-shadow:0 6px 18px rgba(254,94,21,.3)}
-#ui #bExport{background:var(--bl);color:#fff;border-color:var(--bl);box-shadow:var(--shv)}
-#ui .ctr{min-width:62px;text-align:center;color:var(--t1);font-family:var(--display)}
-#ui .sep{width:1px;height:20px;background:var(--bd2)}
-body:not(.edit) #ui{opacity:.35} body:not(.edit) #ui:hover{opacity:1}
-#toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:var(--bl);color:#fff;font-family:var(--head);font-weight:700;padding:8px 20px;border-radius:999px;opacity:0;transition:opacity .25s;z-index:11;pointer-events:none;box-shadow:var(--shv)}
+/* ---- simple UI ---- */
+#bar{position:fixed;left:0;right:0;top:0;z-index:20;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 14px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--bd2);box-shadow:var(--sh2);font-family:var(--head)}
+#bar .grp{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#bar .sp{flex:1}
+.ub{font-family:var(--head);font-weight:700;font-size:17px;min-height:44px;padding:8px 16px;border-radius:999px;border:1.5px solid rgba(18,18,18,.14);background:#fff;color:var(--t1);cursor:pointer;white-space:nowrap;line-height:1.2}
+.ub:hover{border-color:var(--bl);color:var(--bl)}
+.ub:active{transform:translateY(1px)}
+.ub.pri{background:var(--bl);border-color:var(--bl);color:#fff;box-shadow:var(--shv)}
+.ub.org{background:var(--v);border-color:var(--v);color:#fff;box-shadow:0 6px 18px rgba(254,94,21,.3)}
+.ub.grn{background:var(--gr);border-color:var(--gr);color:#fff;box-shadow:0 6px 18px rgba(5,150,105,.3)}
+.ub.sm{font-size:15px;min-height:38px;padding:6px 14px}
+#bEdit{min-width:120px}
+#nav{font-family:var(--head);font-size:16px;min-height:44px;border-radius:12px;border:1.5px solid rgba(18,18,18,.14);padding:6px 10px;background:#fff;color:var(--t1);max-width:300px}
+#hint{position:fixed;left:0;right:0;z-index:19;display:none;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 16px;background:var(--cream);border-bottom:1px solid rgba(245,166,35,.45);font-family:var(--head);font-size:17px;color:var(--t1)}
+body.edit #hint{display:flex}
+#hint .msg{flex:1;min-width:240px}
+#viewport{position:fixed;left:0;right:0;bottom:0;top:0;display:flex;align-items:center;justify-content:center}
+body.present #bar,body.present #hint{display:none!important}
+#exitP{display:none;position:fixed;top:10px;right:10px;z-index:30;opacity:.7}
+#exitP:hover{opacity:1}
+body.present #exitP{display:block}
+#pnav{display:none;position:fixed;right:10px;bottom:10px;z-index:30;gap:6px;opacity:.6}
+#pnav:hover{opacity:1}
+body.present #pnav{display:flex}
+/* row actions + big add button inside slides */
+table.deck col.c4{width:190px} body:not(.edit) table.deck col.c4{width:0}
+td.del{width:190px;background:transparent!important;border:none!important;padding:0 0 0 10px!important;box-shadow:none!important;white-space:nowrap}
+.rowbtn{font-family:var(--head);font-weight:700;font-size:15px;border-radius:999px;border:1.5px solid var(--bd2);background:#fff;color:var(--t1);padding:6px 12px;cursor:pointer;box-shadow:var(--sh2);margin-right:6px}
+.rowbtn.edit{color:var(--bl);border-color:rgba(30,81,229,.4)}
+.rowbtn.del{color:var(--re);border-color:rgba(220,38,38,.35)}
+.rowbtn:hover{filter:brightness(.96)}
+.addbig{position:absolute;top:92px;right:72px;z-index:3;font-family:var(--head);font-weight:700;font-size:22px;color:#fff;background:var(--bl);border:none;border-radius:999px;padding:12px 26px;cursor:pointer;box-shadow:var(--shv)}
+.addbig:hover{background:var(--bl2)}
+.addbig.g{right:206px}
+/* modal */
+#modal{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(17,17,17,.45);padding:16px}
+#modal.on{display:flex}
+#modal .box{background:#fff;border-radius:var(--r-lg);box-shadow:0 20px 60px rgba(0,0,0,.25);width:min(560px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:22px 24px;font-family:var(--body)}
+#modal h3{font-family:var(--head);font-size:24px;margin-bottom:14px}
+#modal label{display:block;font-family:var(--head);font-weight:700;font-size:17px;margin:12px 0 6px}
+#modal input,#modal textarea{width:100%;font-family:var(--body);font-size:17px;padding:10px 12px;border:1.5px solid var(--bd2);border-radius:12px;background:var(--s2);color:var(--t1)}
+#modal input:focus,#modal textarea:focus{outline:2px solid var(--bl);background:#fff}
+#modal textarea{min-height:72px;resize:vertical}
+#modal .err{color:var(--re);font-size:15px;margin-top:8px;min-height:18px}
+#modal .acts{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+#toast{position:fixed;top:76px;left:50%;transform:translateX(-50%);background:var(--bl);color:#fff;font-family:var(--head);font-weight:700;font-size:17px;padding:10px 22px;border-radius:999px;opacity:0;transition:opacity .25s;z-index:60;pointer-events:none;box-shadow:var(--shv)}
 #toast.on{opacity:1}
+@media (max-width:760px){.ub{font-size:15px;min-height:40px;padding:6px 12px}#nav{max-width:100%;flex:1 1 100%}#bar .sp{display:none}#hint{font-size:15px}#modal .box{width:100%}}
 </style>
 </head>
-<body class="edit">
+<body>
 <div id="viewport"><div id="stage"></div></div>
-<div id="ui">
-  <button id="bPrev" title="ก่อนหน้า (←)">‹</button>
-  <span class="ctr" id="ctr">1 / 12</span>
-  <button id="bNext" title="ถัดไป (→)">›</button>
-  <span class="sep"></span>
-  <button id="bEdit" title="สลับโหมดแก้ไข / นำเสนอ (E)">โหมดนำเสนอ (E)</button>
-  <button id="bFull" title="เต็มจอ (F)">เต็มจอ (F)</button>
-  <span class="sep editonly"></span>
-  <button id="bExport" class="editonly" title="ดาวน์โหลดไฟล์ .html ใหม่ที่รวมการแก้ไข">Export</button>
-  <button id="bData" class="editonly" title="ดาวน์โหลดข้อมูลทุกตาราง เป็นไฟล์ Excel (.xlsx) หนึ่งชีตต่อหนึ่งตาราง">Export ข้อมูล (.xlsx)</button>
-  <button id="bCsv" class="editonly" title="ดาวน์โหลดข้อมูลทุกตาราง เป็นไฟล์ CSV (UTF-8) รวมใน .zip">CSV (.zip)</button>
-  <button id="bReset" class="editonly" title="ล้างการแก้ไขกลับเป็นค่าเริ่มต้น">Reset</button>
+<div id="bar">
+  <div class="grp"><select id="nav" aria-label="ไปที่สไลด์"></select>
+  <button class="ub" id="bPrev">◀ ก่อนหน้า</button><button class="ub" id="bNext">▶ ถัดไป</button></div>
+  <span class="sp"></span>
+  <div class="grp"><button class="ub pri" id="bEdit">✏️ แก้ไข</button>
+  <button class="ub" id="bPresent">นำเสนอเต็มจอ</button>
+  <button class="ub org" id="bData">ดาวน์โหลด Excel</button>
+  <button class="ub" id="bCsv">ดาวน์โหลด CSV</button></div>
 </div>
+<div id="hint"><span class="msg">โหมดแก้ไข: กด + เพิ่มรายชื่อ หรือ ✏️ เพื่อแก้ ข้อมูลเก็บในเครื่องนี้ กดดาวน์โหลด Excel เพื่อแชร์</span>
+  <button class="ub sm" id="bExport" title="บันทึกสไลด์ทั้งชุดพร้อมข้อมูลที่แก้ เป็นไฟล์ .html">ดาวน์โหลดไฟล์สไลด์ (.html)</button>
+  <button class="ub sm" id="bReset" title="ล้างข้อมูลที่แก้ในเครื่องนี้ กลับเป็นค่าเริ่มต้น">ล้างข้อมูลที่แก้</button></div>
+<button class="ub" id="exitP">✕ ออกจากโหมดนำเสนอ</button>
+<div id="pnav"><button class="ub sm" id="pPrev">◀</button><button class="ub sm" id="pNext">▶</button></div>
+<div id="modal" role="dialog" aria-modal="true"><div class="box"><h3 id="mTitle"></h3><form id="mForm" autocomplete="off"><div id="mFields"></div><div class="err" id="mErr"></div>
+  <div class="acts"><button type="button" class="ub" id="mCancel">ยกเลิก</button><button type="submit" class="ub pri" id="mSave">บันทึก</button></div></form></div></div>
 <div id="toast"></div>
 <script id="seed" type="application/json">{"rev": "v3-sitetheme-20261123", "texts": {}, "tables": {"brand": {"cols": ["ชื่อแบรนด์", "Service", "Product", "Potential (ความน่าสนใจ)"], "w": [18, 30, 22, 30], "pot": 1, "prod": 1, "rows": [["Asus", "Thematic Video", "popstudio", "ปิดดีลได้แล้ว"], ["Carryboy", "Class & Enterprise", "popcont & popstudio", "มี potential สูง"], ["Trillion Motor", "Class & Enterprise", "popcont & popstudio", "มี potential สูง"], ["Kinza", "Tools", "popcont", "มี potential แต่ติดต่อยาก"]]}, "agency": {"cols": ["ชื่อแบรนด์", "Service", "Product", "Potential (ความน่าสนใจ)"], "w": [18, 30, 22, 30], "pot": 1, "prod": 1, "rows": [["insightout", "ตัวแทนขาย popcont ให้เรา", "popcont & popstudio", "น่าสนใจมาก เข้าที่ประชุมของเขาแล้ว"], ["invade", "ทำคลาสร่วมกัน", "popcont", "น่าสนใจ"]]}, "production": {"cols": ["ชื่อแบรนด์", "Service", "Product", "Potential (ความน่าสนใจ)"], "w": [18, 30, 22, 30], "pot": 1, "prod": 1, "rows": []}, "media": {"cols": ["ชื่อแบรนด์", "Service", "Product", "Potential (ความน่าสนใจ)"], "w": [18, 30, 22, 30], "pot": 1, "prod": 1, "rows": [["CTC", "ทำคลาสสอน graphic ให้เขา เพื่อแลกกับการขอพูดในงานปีหน้า", "popstudio & higgsfield", "น่าสนใจมาก นัดแล้ว"], ["Salmon podcast", "ทำคลาสสอน graphic ให้เขา เพื่อแลกกับการขอเข้ารายการ", "popstudio & higgsfield", "น่าสนใจมาก"]]}, "kpi": {"cols": ["ตัวชี้วัด", "หน่วย", "เป้าเดือน", "เป้าไตรมาส", "ของจริงที่รู้"], "w": [25, 9, 11, 11, 44], "note": 4, "center": [2, 3], "addTpl": ["", "", "___", "___", ""], "rows": [["เครดิตที่ขายได้ (ตัวหลัก)", "เครดิต", "___", "___", "ยังไม่มีตัวเลขรวม มีแค่ยอดใช้ช่วงสั้น เช่น POP STUDIO ใช้ 332 เครดิต ซึ่งไม่ใช่ยอดขาย"], ["รายได้จากเครดิต / รายได้ B2B", "บาท", "___", "___", "Asus ปิดดีลแล้ว จากข้อมูลเดิมมีตัวเลข 4.5 ล้านก่อน VAT ยังไม่มียอดรวมทั้งบริษัท"], ["ดีล B2B ที่ปิดได้", "ดีล", "___", "___", "มีอยู่แล้ว: Asus"], ["มูลค่าท่อขาย (coverage)", "บาท", "___", "___", "ยังไม่มีตัวเลขรวม เป้ามาตรฐานคือประมาณ 3 เท่าของเป้า"], ["อัตราปิด (win rate)", "%", "___", "___", "ยังไม่มีตัวเลข"], ["ขนาดดีลเฉลี่ย", "บาท", "___", "___", "ให้ตั้งแยกตาม 4 กลุ่ม ยังไม่มีค่าเฉลี่ยจริง"], ["รอผลขายจนปิด (sales cycle)", "วัน", "___", "___", "ยังไม่มีตัวเลข"], ["การซื้อซ้ำ / การต่อ (repeat / retention)", "ราย / %", "___", "___", "ยังไม่มีตัวเลขรวม"], ["อัตราการใช้เครดิต", "%", "___", "___", "ถ้าซื้อแล้วแต่ไม่ใช้ ลูกค้าอาจไม่ต่อ"], ["ลูกค้าใหม่ต่อเดือน", "ราย", "___", "___", "ยังไม่มีตัวเลขรวม"]]}, "split": {"cols": ["กลุ่ม", "สัดส่วนเป้า", "เป้าเงิน", "ดีลเฉลี่ย", "ดีลที่ต้องปิด"], "w": [28, 18, 18, 18, 18], "center": [1, 2, 3, 4], "addTpl": ["", "___%", "___", "___", "___"], "rows": [["Brand", "___%", "___", "___", "___"], ["Agency", "___%", "___", "___", "___"], ["Production house", "___%", "___", "___", "___"], ["Media", "___%", "___", "___", "___"], ["รวม", "100%", "___", "", "___"]]}, "example": {"cols": ["กลุ่ม", "สัดส่วน (ตัวอย่าง)", "เป้าเงิน", "ดีลเฉลี่ย (ตัวอย่าง)", "ดีลที่ต้องปิด"], "w": [26, 18, 18, 20, 18], "center": [1, 2, 3, 4], "rows": [["Brand", "50%", "600,000", "100,000", "6"], ["Agency", "20%", "240,000", "40,000", "6"], ["Production house", "15%", "180,000", "60,000", "3"], ["Media", "15%", "180,000", "60,000", "3"], ["รวม", "100%", "1,200,000", "", "18 ดีล"]]}}}</script>
 <script>
@@ -189,11 +230,11 @@ function tbl(key,from,to,o={}){
     return `<tr class="${total?'total':''}">${r.map((c,ci)=>{const last=ci==cols.length-1;
       const cls=[last?'last':'',t.pot&&ci==3?'pot':'',t.prod&&ci==2?'prod':'',/^_{3}%?$/.test(String(c).trim())?'blank':'',t.note&&ci==t.note?'note':'',t.center&&t.center.includes(ci)?'cc':''].join(' ');
       const inner=`<span ${t.pot&&ci==3?'class="pill" ':''}contenteditable="true" data-t="${key}" data-r="${ri}" data-c="${ci}" data-ph="${esc(cols[ci])}">${esc(c)}</span>`;
-      return `<td class="${cls}">${inner}</td>`}).join('')}<td class="del editonly"><button class="delbtn" data-t="${key}" data-r="${ri}" title="ลบแถวนี้">×</button></td></tr>`}).join('')
+      return `<td class="${cls}">${inner}</td>`}).join('')}<td class="del editonly"><button class="rowbtn edit" data-edit="${key}" data-r="${ri}">✏️ แก้ไข</button><button class="rowbtn del" data-del="${key}" data-r="${ri}">🗑 ลบ</button></td></tr>`}).join('')
     :`<tr class="empty"><td colspan="${cols.length}">${esc(o.empty||'')}</td></tr>`;
   return `<div class="tablewrap" data-fs="${o.fs||22}"><table class="deck"><colgroup>${cols.map((c,i)=>`<col style="width:${w[i]||''}%">`).join('')}<col class="c4 editonly"></colgroup>
   <thead><tr>${cols.map((c,i)=>`<th class="${t.center&&t.center.includes(i)?'c':''}">${esc(c)}</th>`).join('')}<th class="editonly"></th></tr></thead><tbody>${body}</tbody></table>
-  ${showAdd?`<button class="addrow editonly" data-add="${key}">+ เพิ่มแถว</button>`:''}</div>`;
+  </div>`;
 }
 const kick=(chip,txt,blue)=>`<div class="kicker hdr"><b class="${blue?'':'or'}">${chip}</b>${txt||''}</div>`;
 function render(){
@@ -207,7 +248,7 @@ function render(){
    <div class="presenter"><b>${T('t-p1','Kho')}</b> · ${T('t-p2','Co-Founder & CGO')}</div>${bucket}</section>`,
   `<section class="slide">${MARK}<h2 class="hdr" style="margin-top:34px">${T('ov-h','รายชื่อลูกค้า B2B แบ่ง 4 กลุ่ม ตามที่ก้อจัด')}</h2>
    <div class="ov">${ov}</div><div class="ovtotal">รวม <b>${total}</b></div></section>`,
-  ...GROUPS.map(([key,name,num],gi)=>`<section class="slide">${MARK}<div class="pop sec ${['orange','blue','yellow','fah'][gi]}"></div>${kick(num,'',1)}<h2 class="hdr">${T('g-'+key+'-h',name)}</h2>
+  ...GROUPS.map(([key,name,num],gi)=>`<section class="slide">${MARK}<div class="pop sec ${['orange','blue','yellow','fah'][gi]}"></div>${kick(num,'',1)}<h2 class="hdr">${T('g-'+key+'-h',name)}</h2><button class="addbig g editonly" data-add="${key}">+ เพิ่มรายชื่อ</button>
    <div class="grow">${tbl(key,0,null,{fs:24,empty:S.texts['empty-prod']!=null?S.texts['empty-prod']:'ยังไม่มีรายชื่อ'})}</div></section>`),
   `<section class="slide">${MARK}${kick('KPI','',1)}<h2 class="hdr">${T('kpi-h','KPI ของก้อ')}</h2>
    <div class="sub">${T('kpi-intro','ตัวชี้วัดหลักของก้อในฐานะ CGO ที่ขายเครดิต B2B ควรเป็นยอดเครดิตที่ขายได้ หรือรายได้จากเครดิต ต่อเดือนและต่อไตรมาส แล้วถอดกลับเป็นจำนวนดีล นัด และลีดที่ต้องมีเพื่อให้ถึงเป้า แบ่งเป้าตาม 4 กลุ่ม ช่องเป้าเป็น ___ ให้ก้อเติมเอง ไม่ได้เดาเลขให้')}</div>
@@ -220,9 +261,9 @@ function render(){
    <div class="notebox">${T('kpi-note','อัตราปิด คือสัดส่วนของนัดที่ปิดเป็นขาย อัตราลีดได้นัด คือสัดส่วนของลีดที่นัดได้จริง มูลค่าท่อขายควรมีประมาณ 3 เท่าของเป้า ขนาดดีลเฉลี่ยให้ตั้งแยกตาม 4 กลุ่ม บางงานกลุ่ม Media เป็นการแลกคลาสกับเวที ไม่ใช่ขายเครดิตตรงๆ เวลาตั้งเป้าเงินให้แยกให้ชัด')}</div></section>`,
   `<section class="slide">${MARK}${kick('KPI','',1)}<h2 class="hdr">${T('kpi-h','KPI ของก้อ')}<span class="part">1/2</span></h2>
    <div class="grow">${tbl('kpi',0,5,{fs:21,add:false})}</div></section>`,
-  `<section class="slide">${MARK}${kick('KPI','',1)}<h2 class="hdr">${T('kpi-h','KPI ของก้อ')}<span class="part">2/2</span></h2>
+  `<section class="slide">${MARK}${kick('KPI','',1)}<h2 class="hdr">${T('kpi-h','KPI ของก้อ')}<span class="part">2/2</span></h2><button class="addbig editonly" data-add="kpi">+ เพิ่มแถว</button>
    <div class="grow">${tbl('kpi',5,null,{fs:21})}</div></section>`,
-  `<section class="slide">${MARK}${kick('KPI','',1)}<h2 class="hdr">${T('kpi-h','KPI ของก้อ')}</h2>
+  `<section class="slide">${MARK}${kick('KPI','',1)}<h2 class="hdr">${T('kpi-h','KPI ของก้อ')}</h2><button class="addbig editonly" data-add="split">+ เพิ่มแถว</button>
    <div class="sub">${T('split-intro','แบ่งเป้ารวมตาม 4 กลุ่ม ช่องที่ยังว่างให้ก้อเติมเลขจริง')}</div>
    <div class="grow">${tbl('split',0,null,{fs:24})}</div></section>`,
   `<section class="slide compact">${MARK}<div class="exstamp">${T('ex-lead','ตัวอย่าง ไม่ใช่ตัวเลขจริง')}</div>${kick('ตัวอย่าง','',0)}<h2 class="hdr">${T('ex-h','ตัวอย่างการคำนวณ')}</h2>
@@ -255,7 +296,9 @@ let slides=[],cur=0,dirty=false;
 try{cur=Math.max(0,parseInt(sessionStorage.getItem(KEY+':cur'))||0)}catch(e){}
 function go(n,silent){if(dirty&&!silent&&n===1){dirty=false;cur=1;render();return}
   cur=Math.max(0,Math.min(slides.length-1,n));slides.forEach((s,i)=>s.classList.toggle('active',i===cur));
-  document.getElementById('ctr').textContent=(cur+1)+' / '+slides.length;try{sessionStorage.setItem(KEY+':cur',cur)}catch(e){}}
+  const nv=document.getElementById('nav');if(nv){if(nv.options.length!==slides.length)buildNav();nv.value=String(cur)}try{sessionStorage.setItem(KEY+':cur',cur)}catch(e){}}
+function buildNav(){const nv=document.getElementById('nav');const sfx={7:' (สูตร)',8:' 1/2',9:' 2/2',10:' (แบ่งเป้าตาม 4 กลุ่ม)',11:' (ตาราง)',12:''};
+  nv.innerHTML=slides.map((sl,i)=>{let t=i===0?'popcont B2B Plan 2026-2027 (ร่าง)':((sl.querySelector('h2')||{}).firstChild||{}).textContent||'';t=t.trim();return `<option value="${i}">${i+1} / ${slides.length} · ${esc(t)}${esc(sfx[i+1]||'')}</option>`}).join('')}
 function isEdit(){return document.body.classList.contains('edit')}
 function setEditable(){document.querySelectorAll('[contenteditable]').forEach(e=>e.setAttribute('contenteditable',isEdit()?'true':'false'))}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),1600)}
@@ -268,18 +311,45 @@ stage.addEventListener('focusout',()=>fitAll());
 stage.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&e.target.isContentEditable){e.preventDefault();e.target.blur()}});
 stage.addEventListener('paste',e=>{if(!e.target.closest('[contenteditable]'))return;e.preventDefault();document.execCommand('insertText',false,(e.clipboardData||window.clipboardData).getData('text/plain'))});
 stage.addEventListener('click',e=>{
-  const a=e.target.closest('[data-add]');if(a){const k=a.dataset.add;const t=S.tables[k];
-    const blank=t.cols.map((c,i)=>t.addTpl?t.addTpl[i]:'');
-    // keep a "รวม" row last
-    const li=t.rows.length-1;if(li>=0&&/^รวม$/.test((t.rows[li][0]||'').trim()))t.rows.splice(li,0,blank);else t.rows.push(blank);
-    save();render();const rows=slides[cur].querySelectorAll('tbody tr:not(.total)');const c=rows[rows.length-1]&&rows[rows.length-1].querySelector('[contenteditable]');if(c)c.focus();toast('เพิ่มแถวแล้ว');return}
-  const d=e.target.closest('.delbtn[data-t]');if(d){const k=d.dataset.t,r=+d.dataset.r,name=S.tables[k].rows[r][0]||'แถวนี้';
-    if(confirm('ลบ "'+name+'" ?')){S.tables[k].rows.splice(r,1);save();render();toast('ลบแล้ว')}return}
-  if(!isEdit()){const r=stage.getBoundingClientRect();go(cur+(e.clientX<r.left+r.width/3?-1:1))}
+  const a=e.target.closest('[data-add]');if(a){openForm(a.dataset.add,-1);return}
+  const ed=e.target.closest('[data-edit]');if(ed){openForm(ed.dataset.edit,+ed.dataset.r);return}
+  const d=e.target.closest('[data-del]');if(d){delRow(d.dataset.del,+d.dataset.r);return}
+  if(isPresent()){const r=stage.getBoundingClientRect();go(cur+(e.clientX<r.left+r.width/3?-1:1))}
 });
-function toggleEdit(){document.body.classList.toggle('edit');if(document.activeElement)document.activeElement.blur();setEditable();
-  document.getElementById('bEdit').textContent=isEdit()?'โหมดนำเสนอ (E)':'โหมดแก้ไข (E)';fitAll();toast(isEdit()?'โหมดแก้ไข':'โหมดนำเสนอ')}
-function full(){if(!document.fullscreenElement)document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();else document.exitFullscreen()}
+const GROUP_LABELS=['ชื่อ','Service','Product','Potential'];
+let mKey=null,mRow=-1;
+function openForm(key,ri){const t=S.tables[key];mKey=key;mRow=ri;const isGroup=GROUPS.some(g=>g[0]===key);
+  const gname=(GROUPS.find(g=>g[0]===key)||[])[1];
+  document.getElementById('mTitle').textContent=(ri<0?(isGroup?'+ เพิ่มรายชื่อ':'+ เพิ่มแถว'):'✏️ แก้ไข')+' · '+(gname||({kpi:'KPI ของก้อ',split:'แบ่งเป้าตาม 4 กลุ่ม',example:'ตัวอย่างการคำนวณ'}[key]||key));
+  const vals=ri<0?t.cols.map((c,i)=>t.addTpl?t.addTpl[i]:''):t.rows[ri].slice();
+  const sugg=[...new Set(t.rows.map(r=>r[3]).filter(Boolean))];
+  document.getElementById('mFields').innerHTML=t.cols.map((c,i)=>{const lab=isGroup?GROUP_LABELS[i]:c;const long=(t.note===i)||(isGroup&&i===1);
+    const v=esc(vals[i]==null?'':vals[i]);
+    return `<label for="mf${i}">${esc(lab)}</label>`+(long?`<textarea id="mf${i}" data-i="${i}">${v}</textarea>`:`<input id="mf${i}" data-i="${i}" value="${v}"${isGroup&&i===3?' list="mPot"':''}>`)}).join('')+
+    (isGroup?`<datalist id="mPot">${sugg.map(x=>`<option value="${esc(x)}">`).join('')}</datalist>`:'');
+  document.getElementById('mErr').textContent='';
+  document.getElementById('modal').classList.add('on');setTimeout(()=>{const f=document.getElementById('mf0');if(f)f.focus()},30)}
+function closeForm(){document.getElementById('modal').classList.remove('on');mKey=null}
+document.getElementById('mCancel').onclick=closeForm;
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeForm()});
+document.getElementById('mForm').addEventListener('submit',e=>{e.preventDefault();if(!mKey)return;const t=S.tables[mKey];
+  const vals=t.cols.map((c,i)=>{const el=document.getElementById('mf'+i);return el?el.value.trim():''});
+  if(!vals[0]){document.getElementById('mErr').textContent='กรุณากรอกช่องแรก ('+(GROUPS.some(g=>g[0]===mKey)?'ชื่อ':t.cols[0])+')';document.getElementById('mf0').focus();return}
+  if(mRow<0){const li=t.rows.length-1;if(li>=0&&/^รวม$/.test((t.rows[li][0]||'').trim())&&!/^รวม$/.test(vals[0]))t.rows.splice(li,0,vals);else t.rows.push(vals);toast('เพิ่มแล้ว: '+vals[0])}
+  else{t.rows[mRow]=vals;toast('บันทึกแล้ว: '+vals[0])}
+  dirty=true;save();closeForm();render();});
+function delRow(key,ri){const name=S.tables[key].rows[ri][0]||'แถวนี้';
+  if(confirm('ต้องการลบ "'+name+'" ใช่ไหม?')){S.tables[key].rows.splice(ri,1);dirty=true;save();render();toast('ลบแล้ว: '+name)}}
+function isPresent(){return document.body.classList.contains('present')}
+function setEdit(on){document.body.classList.toggle('edit',on);if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();setEditable();
+  const b=document.getElementById('bEdit');b.textContent=on?'✅ เสร็จ':'✏️ แก้ไข';b.className='ub '+(on?'grn':'pri');layout();fitAll()}
+function toggleEdit(){setEdit(!isEdit());toast(isEdit()?'โหมดแก้ไข':'เสร็จแล้ว ข้อมูลถูกเก็บไว้ในเครื่องนี้')}
+function enterPresent(){setEdit(false);document.body.classList.add('present');layout();const el=document.documentElement;
+  try{const r=el.requestFullscreen?el.requestFullscreen():(el.webkitRequestFullscreen?el.webkitRequestFullscreen():null);if(r&&r.catch)r.catch(()=>{})}catch(e){}}
+function exitPresent(){document.body.classList.remove('present');layout();
+  try{if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen();else if(document.webkitFullscreenElement&&document.webkitExitFullscreen)document.webkitExitFullscreen()}catch(e){}}
+function full(){isPresent()?exitPresent():enterPresent()}
+['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{if(!(document.fullscreenElement||document.webkitFullscreenElement)&&isPresent()){document.body.classList.remove('present');layout()}}));
 function exportHtml(){const st=JSON.parse(JSON.stringify(S));st.rev='export-'+Date.now();
   const json=JSON.stringify(st).replace(/</g,'\\u003c');
   const out=PRISTINE.replace(/(<script id="seed" type="application\/json">)[\s\S]*?(<\/script>)/,(m,a,b)=>a+json+b);
@@ -288,7 +358,9 @@ function exportHtml(){const st=JSON.parse(JSON.stringify(S));st.rev='export-'+Da
   document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);toast('ดาวน์โหลดไฟล์แล้ว')}
 function reset(){if(!confirm('ล้างการแก้ไขทั้งหมด กลับเป็นค่าเริ่มต้นของไฟล์นี้?'))return;localStorage.removeItem(KEY);S=JSON.parse(JSON.stringify(SEED));render();toast('Reset แล้ว')}
 document.getElementById('bPrev').onclick=()=>go(cur-1);document.getElementById('bNext').onclick=()=>go(cur+1);
-document.getElementById('bEdit').onclick=toggleEdit;document.getElementById('bFull').onclick=full;
+document.getElementById('pPrev').onclick=()=>go(cur-1);document.getElementById('pNext').onclick=()=>go(cur+1);
+document.getElementById('bEdit').onclick=toggleEdit;document.getElementById('bPresent').onclick=enterPresent;document.getElementById('exitP').onclick=exitPresent;
+document.getElementById('nav').onchange=e=>go(+e.target.value);
 
 /* ---- data export: xlsx (OOXML, stored zip) + csv zip, fully client-side ---- */
 const DATA_TABLES=[['brand','Brand'],['agency','Agency'],['production','Production house'],['media','Media'],['kpi','KPI'],['split','แบ่งเป้าตาม 4 กลุ่ม'],['example','ตัวอย่างการคำนวณ']];
@@ -327,15 +399,19 @@ function exportCsv(){if(document.activeElement&&document.activeElement.isContent
   download(zip(files),`popcont_B2B_Plan_data_${stamp()}_csv.zip`);toast('ดาวน์โหลด CSV (.zip) แล้ว')}
 document.getElementById('bData').onclick=exportXlsx;document.getElementById('bCsv').onclick=exportCsv;
 document.getElementById('bExport').onclick=exportHtml;document.getElementById('bReset').onclick=reset;
-document.addEventListener('keydown',e=>{if(e.target.isContentEditable||/INPUT|TEXTAREA/.test(e.target.tagName))return;if(e.metaKey||e.ctrlKey||e.altKey)return;
-  const k=e.key;if(['ArrowRight','ArrowDown','PageDown',' '].includes(k)){e.preventDefault();go(cur+1)}
+document.addEventListener('keydown',e=>{if(document.getElementById('modal').classList.contains('on')){if(e.key==='Escape')closeForm();return}
+  if(e.target.isContentEditable||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;if(e.metaKey||e.ctrlKey||e.altKey)return;
+  const k=e.key;if(['ArrowRight','ArrowDown','PageDown'].includes(k)){e.preventDefault();go(cur+1)}
   else if(['ArrowLeft','ArrowUp','PageUp'].includes(k)){e.preventDefault();go(cur-1)}
-  else if(k==='Home')go(0);else if(k==='End')go(slides.length-1);
-  else if(k==='f'||k==='F'||e.code==='KeyF')full();else if(k==='e'||k==='E'||e.code==='KeyE')toggleEdit();else if(k==='Escape'&&!isEdit()&&!document.fullscreenElement)toggleEdit();});
-function scale(){const s=Math.min(innerWidth/1280,innerHeight/720);stage.style.transform='scale('+s+')'}
-addEventListener('resize',scale);scale();render();
+  else if(k==='Escape'&&isPresent())exitPresent();});
+function layout(){const vp=document.getElementById('viewport'),bar=document.getElementById('bar'),hint=document.getElementById('hint');
+  let top=0;if(!isPresent()){top=bar.offsetHeight;hint.style.top=top+'px';if(isEdit())top+=hint.offsetHeight}
+  vp.style.top=top+'px';const W=innerWidth-(isPresent()?0:16),H=innerHeight-top-(isPresent()?0:16);const sc=Math.max(.1,Math.min(W/1280,H/720));stage.style.transform='scale('+sc+')';
+  document.getElementById('toast').style.top=(top+12)+'px'}
+function scale(){layout()}
+addEventListener('resize',layout);render();setEdit(false);layout();
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fitAll);
-window.__deck={go,get state(){return S},render,toggleEdit};
+window.__deck={go,get state(){return S},render,toggleEdit,get cur(){return cur}};
 })();
 </script>
 </body>
