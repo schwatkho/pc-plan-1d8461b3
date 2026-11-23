@@ -173,6 +173,21 @@ td.del{width:190px;background:transparent!important;border:none!important;paddin
 .addbig{position:absolute;top:92px;right:72px;z-index:3;font-family:var(--head);font-weight:700;font-size:22px;color:#fff;background:var(--bl);border:none;border-radius:999px;padding:12px 26px;cursor:pointer;box-shadow:var(--shv)}
 .addbig:hover{background:var(--bl2)}
 .addbig.g{right:206px}
+/* follow-up columns */
+table.deck th.fuh{color:var(--v3)}
+table.deck td.fu{font-size:.8em;line-height:1.35;background:#fffdf9}
+td.fu .fun{display:block;font-family:var(--display);font-weight:700;color:var(--v);white-space:nowrap}
+td.fu .fud{display:block;font-family:var(--display);font-weight:700;font-size:.92em;color:var(--t2)}
+td.fu .fut{display:block;color:var(--t1)}
+td.fu .fue{color:var(--t3)}
+.rowbtn.log{display:block;margin:6px auto 0;font-size:13px;padding:5px 10px;color:var(--v3);border-color:rgba(254,94,21,.4);white-space:nowrap}
+#modal .logs{margin-top:16px;border-top:1px solid var(--bd2);padding-top:12px}
+#modal .logs h4{font-family:var(--head);font-size:17px;margin-bottom:8px}
+#modal .lg{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:12px;background:var(--s2);margin-bottom:6px;font-size:16px}
+#modal .lg .ld{font-family:var(--display);font-weight:700;white-space:nowrap;color:var(--t2)}
+#modal .lg .lt{flex:1;white-space:pre-wrap;word-break:break-word}
+#modal .lg button{flex:none}
+#modal .none{color:var(--t3);font-size:15px}
 /* modal */
 #modal{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(17,17,17,.45);padding:16px}
 #modal.on{display:flex}
@@ -223,17 +238,31 @@ const T=(k,def)=>`<span contenteditable="true" data-k="${k}" data-ph="${esc(def)
 const MARK=`<div class="brandmark"><i class="logo-img" role="img" aria-label="popcont"></i><span>B2B Plan 2026-2027</span></div>`;
 const bucket=`<div class="pop blue" style="width:250px;height:250px;right:300px;top:40px;transform:rotate(-8deg)"></div><div class="pop orange" style="width:330px;height:330px;right:40px;top:250px;transform:rotate(6deg)"></div><div class="pop yellow" style="width:200px;height:200px;right:360px;bottom:40px;transform:rotate(-4deg)"></div><div class="pop fah" style="width:180px;height:180px;right:70px;top:46px;transform:rotate(8deg)"></div>`;
 // generic table: key, row range [from,to), options
+/* ---- follow-up log (stored as row[cols.length] = [{d,t,ts}]) ---- */
+const FU_COLS=['ตามแล้ว','คุยล่าสุด'],FU_W=[14,22,15,18,11,20];
+const isClosed=r=>/ปิดดีล/.test(String(r[3]||''));
+function logsOf(key,r){const t=S.tables[key];const L=r[t.cols.length];return Array.isArray(L)?L:[]}
+function sortedLogs(L){return L.slice().sort((a,b)=>(b.d||'').localeCompare(a.d||'')||(b.ts||0)-(a.ts||0))}
+function fmtD(d){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(d||'');return m?`${m[3]}/${m[2]}/${m[1]}`:(d||'')}
+function todayISO(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`}
+function fuCells(key,r,ri){const L=logsOf(key,r);
+  if(isClosed(r))return `<td class="fu cc">—</td><td class="fu last cc">—</td>`;
+  const lt=sortedLogs(L)[0];const txt=lt?lt.t||'':'';const short=txt.length>42?txt.slice(0,40)+'…':txt;
+  return `<td class="fu cc"><b class="fun">${L.length} ครั้ง</b><button class="rowbtn log editonly" data-log="${key}" data-r="${ri}">📝 บันทึกการตาม</button></td>`+
+    `<td class="fu last">${lt?`<span class="fud">${esc(fmtD(lt.d))}</span><span class="fut" title="${esc(txt)}">${esc(short)}</span>`:'<span class="fue">—</span>'}</td>`}
 function tbl(key,from,to,o={}){
   const t=S.tables[key],cols=t.cols,w=t.w||[];to=to==null?t.rows.length:Math.min(to,t.rows.length);
   const rows=t.rows.slice(from,to);const showAdd=o.add!==false;
   const body=rows.length?rows.map((r,j)=>{const ri=from+j;const total=/^รวม$/.test((r[0]||'').trim());
-    return `<tr class="${total?'total':''}">${r.map((c,ci)=>{const last=ci==cols.length-1;
+    const grp=!!t.pot;const fu=grp?fuCells(key,r,ri):'';
+    return `<tr class="${total?'total':''}">${r.slice(0,cols.length).map((c,ci)=>{const last=!grp&&ci==cols.length-1;
       const cls=[last?'last':'',t.pot&&ci==3?'pot':'',t.prod&&ci==2?'prod':'',/^_{3}%?$/.test(String(c).trim())?'blank':'',t.note&&ci==t.note?'note':'',t.center&&t.center.includes(ci)?'cc':''].join(' ');
       const inner=`<span ${t.pot&&ci==3?'class="pill" ':''}contenteditable="true" data-t="${key}" data-r="${ri}" data-c="${ci}" data-ph="${esc(cols[ci])}">${esc(c)}</span>`;
-      return `<td class="${cls}">${inner}</td>`}).join('')}<td class="del editonly"><button class="rowbtn edit" data-edit="${key}" data-r="${ri}">✏️ แก้ไข</button><button class="rowbtn del" data-del="${key}" data-r="${ri}">🗑 ลบ</button></td></tr>`}).join('')
-    :`<tr class="empty"><td colspan="${cols.length}">${esc(o.empty||'')}</td></tr>`;
-  return `<div class="tablewrap" data-fs="${o.fs||22}"><table class="deck"><colgroup>${cols.map((c,i)=>`<col style="width:${w[i]||''}%">`).join('')}<col class="c4 editonly"></colgroup>
-  <thead><tr>${cols.map((c,i)=>`<th class="${t.center&&t.center.includes(i)?'c':''}">${esc(c)}</th>`).join('')}<th class="editonly"></th></tr></thead><tbody>${body}</tbody></table>
+      return `<td class="${cls}">${inner}</td>`}).join('')}${fu}<td class="del editonly"><button class="rowbtn edit" data-edit="${key}" data-r="${ri}">✏️ แก้ไข</button><button class="rowbtn del" data-del="${key}" data-r="${ri}">🗑 ลบ</button></td></tr>`}).join('')
+    :`<tr class="empty"><td colspan="${cols.length+(t.pot?2:0)}">${esc(o.empty||'')}</td></tr>`;
+  const ww=t.pot?FU_W:w,hh=t.pot?cols.concat(FU_COLS):cols;
+  return `<div class="tablewrap" data-fs="${o.fs||22}"><table class="deck"><colgroup>${hh.map((c,i)=>`<col style="width:${ww[i]||''}%">`).join('')}<col class="c4 editonly"></colgroup>
+  <thead><tr>${hh.map((c,i)=>`<th class="${t.center&&t.center.includes(i)?'c':''}${t.pot&&i>=cols.length?' fuh':''}">${esc(c)}</th>`).join('')}<th class="editonly"></th></tr></thead><tbody>${body}</tbody></table>
   </div>`;
 }
 const kick=(chip,txt,blue)=>`<div class="kicker hdr"><b class="${blue?'':'or'}">${chip}</b>${txt||''}</div>`;
@@ -307,18 +336,19 @@ stage.addEventListener('input',e=>{const el=e.target.closest('[contenteditable]'
   if(el.dataset.t){dirty=true;S.tables[el.dataset.t].rows[+el.dataset.r][+el.dataset.c]=v;const td=el.closest('td');if(td){if(td.classList.contains('pot'))tone(td);td.classList.toggle('blank',/^_{3}%?$/.test(v.trim()))}}
   else if(el.dataset.k){S.texts[el.dataset.k]=v;document.querySelectorAll('[data-k="'+el.dataset.k+'"]').forEach(o=>{if(o!==el)o.textContent=v})}
   save();});
-stage.addEventListener('focusout',()=>fitAll());
+stage.addEventListener('focusout',e=>{const el=e.target;if(el&&el.dataset&&el.dataset.t&&el.dataset.c==='3'&&S.tables[el.dataset.t].pot){render();return}fitAll()});
 stage.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&e.target.isContentEditable){e.preventDefault();e.target.blur()}});
 stage.addEventListener('paste',e=>{if(!e.target.closest('[contenteditable]'))return;e.preventDefault();document.execCommand('insertText',false,(e.clipboardData||window.clipboardData).getData('text/plain'))});
 stage.addEventListener('click',e=>{
   const a=e.target.closest('[data-add]');if(a){openForm(a.dataset.add,-1);return}
+  const lb=e.target.closest('[data-log]');if(lb){openLog(lb.dataset.log,+lb.dataset.r);return}
   const ed=e.target.closest('[data-edit]');if(ed){openForm(ed.dataset.edit,+ed.dataset.r);return}
   const d=e.target.closest('[data-del]');if(d){delRow(d.dataset.del,+d.dataset.r);return}
   if(isPresent()){const r=stage.getBoundingClientRect();go(cur+(e.clientX<r.left+r.width/3?-1:1))}
 });
 const GROUP_LABELS=['ชื่อ','Service','Product','Potential'];
-let mKey=null,mRow=-1;
-function openForm(key,ri){const t=S.tables[key];mKey=key;mRow=ri;const isGroup=GROUPS.some(g=>g[0]===key);
+let mKey=null,mRow=-1,mMode='row';
+function openForm(key,ri){const t=S.tables[key];mKey=key;mRow=ri;mMode='row';const isGroup=GROUPS.some(g=>g[0]===key);
   const gname=(GROUPS.find(g=>g[0]===key)||[])[1];
   document.getElementById('mTitle').textContent=(ri<0?(isGroup?'+ เพิ่มรายชื่อ':'+ เพิ่มแถว'):'✏️ แก้ไข')+' · '+(gname||({kpi:'KPI ของก้อ',split:'แบ่งเป้าตาม 4 กลุ่ม',example:'ตัวอย่างการคำนวณ'}[key]||key));
   const vals=ri<0?t.cols.map((c,i)=>t.addTpl?t.addTpl[i]:''):t.rows[ri].slice();
@@ -326,17 +356,33 @@ function openForm(key,ri){const t=S.tables[key];mKey=key;mRow=ri;const isGroup=G
   document.getElementById('mFields').innerHTML=t.cols.map((c,i)=>{const lab=isGroup?GROUP_LABELS[i]:c;const long=(t.note===i)||(isGroup&&i===1);
     const v=esc(vals[i]==null?'':vals[i]);
     return `<label for="mf${i}">${esc(lab)}</label>`+(long?`<textarea id="mf${i}" data-i="${i}">${v}</textarea>`:`<input id="mf${i}" data-i="${i}" value="${v}"${isGroup&&i===3?' list="mPot"':''}>`)}).join('')+
-    (isGroup?`<datalist id="mPot">${sugg.map(x=>`<option value="${esc(x)}">`).join('')}</datalist>`:'');
+    (isGroup?`<datalist id="mPot">${sugg.map(x=>`<option value="${esc(x)}">`).join('')}</datalist>`:'')+
+    (isGroup&&ri>=0?`<div class="logs" id="mLogs">${logListHtml(key,ri)}</div><button type="button" class="ub sm" data-mlog="1" style="margin-top:8px">📝 บันทึกการตาม</button>`:'');
   document.getElementById('mErr').textContent='';
   document.getElementById('modal').classList.add('on');setTimeout(()=>{const f=document.getElementById('mf0');if(f)f.focus()},30)}
+function logListHtml(key,ri){const r=S.tables[key].rows[ri];const L=logsOf(key,r);
+  const items=L.map((x,i)=>[x,i]).sort((a,b)=>(b[0].d||'').localeCompare(a[0].d||'')||(b[0].ts||0)-(a[0].ts||0));
+  return `<h4>ประวัติการตาม (${L.length} ครั้ง)</h4>`+(items.length?items.map(([x,i])=>`<div class="lg"><span class="ld">${esc(fmtD(x.d))}</span><span class="lt">${esc(x.t||'')}</span><button type="button" class="rowbtn del" data-lgdel="${i}">🗑 ลบ</button></div>`).join(''):'<div class="none">ยังไม่มีบันทึก</div>')}
+function openLog(key,ri){const t=S.tables[key];mKey=key;mRow=ri;mMode='log';const r=t.rows[ri];
+  document.getElementById('mTitle').textContent='📝 บันทึกการตาม · '+(r[0]||'');
+  document.getElementById('mFields').innerHTML=`<label for="lgD">วันที่</label><input type="date" id="lgD" value="${todayISO()}"><label for="lgT">คุยอะไร / สถานะล่าสุด</label><textarea id="lgT"></textarea><div class="logs" id="mLogs">${logListHtml(key,ri)}</div>`;
+  document.getElementById('mErr').textContent='';document.getElementById('modal').classList.add('on');setTimeout(()=>{const f=document.getElementById('lgT');if(f)f.focus()},30)}
+document.getElementById('mFields').addEventListener('click',e=>{
+  const ml=e.target.closest('[data-mlog]');if(ml){openLog(mKey,mRow);return}
+  const dl=e.target.closest('[data-lgdel]');if(!dl||!mKey)return;const t=S.tables[mKey],r=t.rows[mRow],L=r[t.cols.length];const x=L&&L[+dl.dataset.lgdel];if(!x)return;
+  if(confirm('ลบบันทึกวันที่ '+fmtD(x.d)+' ใช่ไหม?')){L.splice(+dl.dataset.lgdel,1);dirty=true;save();document.getElementById('mLogs').innerHTML=logListHtml(mKey,mRow);render();toast('ลบบันทึกแล้ว')}});
 function closeForm(){document.getElementById('modal').classList.remove('on');mKey=null}
 document.getElementById('mCancel').onclick=closeForm;
 document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeForm()});
 document.getElementById('mForm').addEventListener('submit',e=>{e.preventDefault();if(!mKey)return;const t=S.tables[mKey];
+  if(mMode==='log'){const d=document.getElementById('lgD').value||todayISO(),tx=document.getElementById('lgT').value.trim();
+    if(!tx){document.getElementById('mErr').textContent='กรุณากรอกว่าคุยอะไร / สถานะล่าสุด';document.getElementById('lgT').focus();return}
+    const r=t.rows[mRow];const n=t.cols.length;if(!Array.isArray(r[n]))r[n]=[];r[n].push({d,t:tx,ts:Date.now()});
+    dirty=true;save();closeForm();render();toast('บันทึกการตามแล้ว: '+(r[0]||'')+' ('+r[n].length+' ครั้ง)');return}
   const vals=t.cols.map((c,i)=>{const el=document.getElementById('mf'+i);return el?el.value.trim():''});
   if(!vals[0]){document.getElementById('mErr').textContent='กรุณากรอกช่องแรก ('+(GROUPS.some(g=>g[0]===mKey)?'ชื่อ':t.cols[0])+')';document.getElementById('mf0').focus();return}
   if(mRow<0){const li=t.rows.length-1;if(li>=0&&/^รวม$/.test((t.rows[li][0]||'').trim())&&!/^รวม$/.test(vals[0]))t.rows.splice(li,0,vals);else t.rows.push(vals);toast('เพิ่มแล้ว: '+vals[0])}
-  else{t.rows[mRow]=vals;toast('บันทึกแล้ว: '+vals[0])}
+  else{const old=t.rows[mRow];if(Array.isArray(old[t.cols.length]))vals[t.cols.length]=old[t.cols.length];t.rows[mRow]=vals;toast('บันทึกแล้ว: '+vals[0])}
   dirty=true;save();closeForm();render();});
 function delRow(key,ri){const name=S.tables[key].rows[ri][0]||'แถวนี้';
   if(confirm('ต้องการลบ "'+name+'" ใช่ไหม?')){S.tables[key].rows.splice(ri,1);dirty=true;save();render();toast('ลบแล้ว: '+name)}}
@@ -363,7 +409,7 @@ document.getElementById('bEdit').onclick=toggleEdit;document.getElementById('bPr
 document.getElementById('nav').onchange=e=>go(+e.target.value);
 
 /* ---- data export: xlsx (OOXML, stored zip) + csv zip, fully client-side ---- */
-const DATA_TABLES=[['brand','Brand'],['agency','Agency'],['production','Production house'],['media','Media'],['kpi','KPI'],['split','แบ่งเป้าตาม 4 กลุ่ม'],['example','ตัวอย่างการคำนวณ']];
+const DATA_TABLES=[['brand','Brand'],['agency','Agency'],['production','Production house'],['media','Media'],['kpi','KPI'],['split','แบ่งเป้าตาม 4 กลุ่ม'],['example','ตัวอย่างการคำนวณ'],['__log','Log การตาม']];
 const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
 function crc32(u){let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CRC[(c^u[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
 function zip(files){const enc=new TextEncoder(),parts=[],cen=[];let off=0;const d=new Date();
@@ -379,7 +425,10 @@ function zip(files){const enc=new TextEncoder(),parts=[],cen=[];let off=0;const 
   return new Blob([...parts,...cen,new Uint8Array(e.buffer)],{type:'application/zip'})}
 const xesc=v=>String(v==null?'':v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 function colName(i){let s='';i++;while(i>0){const m=(i-1)%26;s=String.fromCharCode(65+m)+s;i=Math.floor((i-1)/26)}return s}
-function tableData(key){const t=S.tables[key];return [t.cols.slice(),...t.rows.map(r=>t.cols.map((c,i)=>r[i]==null?'':String(r[i])))]}
+function tableData(key){if(key==='__log')return logData();const t=S.tables[key];const base=t.rows.map(r=>t.cols.map((c,i)=>r[i]==null?'':String(r[i])));
+  if(!t.pot)return [t.cols.slice(),...base];
+  return [t.cols.concat(['จำนวนครั้งที่ตาม','คุยล่าสุด (วันที่)','สถานะล่าสุด']),...t.rows.map((r,ri)=>{const L=logsOf(key,r),lt=sortedLogs(L)[0];return base[ri].concat([String(L.length),lt?lt.d||'':'',lt?lt.t||'':''])})]}
+function logData(){const out=[['กลุ่ม','ชื่อ','วันที่','สถานะ/สิ่งที่คุย']];GROUPS.forEach(([k,n])=>S.tables[k].rows.forEach(r=>sortedLogs(logsOf(k,r)).reverse().forEach(x=>out.push([n,r[0]||'',x.d||'',x.t||'']))));return out}
 function sheetXml(rows){const w=rows[0].map((_,ci)=>Math.min(70,Math.max(10,...rows.map(r=>[...(r[ci]||'')].length*1.15+2))));
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${w.map((x,i)=>`<col min="${i+1}" max="${i+1}" width="${x.toFixed(1)}" customWidth="1"/>`).join('')}</cols><sheetData>${rows.map((r,ri)=>`<row r="${ri+1}">${r.map((v,ci)=>`<c r="${colName(ci)}${ri+1}" t="inlineStr"${ri===0?' s="1"':' s="2"'}><is><t xml:space="preserve">${xesc(v)}</t></is></c>`).join('')}</row>`).join('')}</sheetData></worksheet>`}
 function stamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`}
