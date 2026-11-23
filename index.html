@@ -146,7 +146,7 @@ body:not(.edit) [contenteditable]:empty::before{content:none}
 #ui #bExport{background:var(--bl);color:#fff;border-color:var(--bl);box-shadow:var(--shv)}
 #ui .ctr{min-width:62px;text-align:center;color:var(--t1);font-family:var(--display)}
 #ui .sep{width:1px;height:20px;background:var(--bd2)}
-body:not(.edit) #ui{opacity:0} body:not(.edit) #ui:hover{opacity:1}
+body:not(.edit) #ui{opacity:.35} body:not(.edit) #ui:hover{opacity:1}
 #toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:var(--bl);color:#fff;font-family:var(--head);font-weight:700;padding:8px 20px;border-radius:999px;opacity:0;transition:opacity .25s;z-index:11;pointer-events:none;box-shadow:var(--shv)}
 #toast.on{opacity:1}
 </style>
@@ -331,7 +331,7 @@ document.addEventListener('keydown',e=>{if(e.target.isContentEditable||/INPUT|TE
   const k=e.key;if(['ArrowRight','ArrowDown','PageDown',' '].includes(k)){e.preventDefault();go(cur+1)}
   else if(['ArrowLeft','ArrowUp','PageUp'].includes(k)){e.preventDefault();go(cur-1)}
   else if(k==='Home')go(0);else if(k==='End')go(slides.length-1);
-  else if(k==='f'||k==='F')full();else if(k==='e'||k==='E')toggleEdit();});
+  else if(k==='f'||k==='F'||e.code==='KeyF')full();else if(k==='e'||k==='E'||e.code==='KeyE')toggleEdit();else if(k==='Escape'&&!isEdit()&&!document.fullscreenElement)toggleEdit();});
 function scale(){const s=Math.min(innerWidth/1280,innerHeight/720);stage.style.transform='scale('+s+')'}
 addEventListener('resize',scale);scale();render();
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fitAll);
